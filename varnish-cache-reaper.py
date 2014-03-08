@@ -9,6 +9,7 @@ from sys import stderr, stdout, exit
 from twisted.web import server, resource, client, http_headers
 from twisted.internet import reactor, error
 
+
 def onFailure(err):
     """
     :type err: twisted.python.failure.Failure
@@ -20,12 +21,14 @@ def onSuccess(res):
     """
     :type res: twisted.web.client.Response
     """
-    if(res.code < 400):
+    if (res.code < 400):
         indicator = "OK"
     else:
         indicator = "!!"
 
-    print("[" + indicator + "] " + res.request.method + " response for " + res.request.absoluteURI + ": " + str(res.code), end="\n", file=stdout)
+    print(
+        "[" + indicator + "] " + res.request.method + " response for " + res.request.absoluteURI + ": " + str(res.code),
+        end="\n", file=stdout)
 
 
 class DispatchResource(resource.Resource):
@@ -38,8 +41,11 @@ class DispatchResource(resource.Resource):
         :type request: twisted.web.http.Request
         """
         for target in self.targets:
-            print("[II] Sending " + method + " request for " + request.getRequestHostname() + request.uri + " to: " + target, end="\n", file=stdout)
-            d = self.agent.request(method,target + request.uri, http_headers.Headers({"Host": [request.getRequestHostname()]}))
+            print(
+                "[II] Sending " + method + " request for " + request.getRequestHostname() + request.uri + " to: " + target,
+                end="\n", file=stdout)
+            d = self.agent.request(method, target + request.uri,
+                                   http_headers.Headers({"Host": [request.getRequestHostname()]}))
             d.addCallbacks(onSuccess, onFailure)
 
     def render_BAN(self, request):
@@ -61,9 +67,10 @@ class DispatchResource(resource.Resource):
         return "PURGE requested for: " + request.getRequestHostname() + request.uri + "\n"
 
 # parse cli argumennts
-parser = ArgumentParser(description="Varnish cache reaper",version="0.1")
+parser = ArgumentParser(description="Varnish cache reaper", version="0.1")
 parser.add_argument("-l", "--listen-ip", action="store", dest="ip", default="", help="IP to listen on, default *")
-parser.add_argument("-p", "--listen-port", action="store", dest="port", type=int, default=8042, help="TCP port to listen on, default 8042")
+parser.add_argument("-p", "--listen-port", action="store", dest="port", type=int, default=8042,
+                    help="TCP port to listen on, default 8042")
 parser.add_argument("targets", action="store", nargs="+", help="Endpoint(s) to send PURGE/BAN requests to")
 args = parser.parse_args()
 
