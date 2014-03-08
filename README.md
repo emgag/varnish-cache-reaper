@@ -1,14 +1,13 @@
-varnish-cache-reaper
-====================
+# varnish-cache-reaper
 
-Simple python/twisted HTTP daemon forwarding PURGE and BAN requests to multiple varnish (or other proxy) instances
+Simple python/twisted HTTP daemon forwarding PURGE and BAN requests to multiple varnish (or other proxy) instances.
 
 The daemon forwards all HTTP PURGE and BAN requests using the original Host-header and URL to all configured endpoints.
 See [Varnish documentation](https://www.varnish-cache.org/docs/3.0/tutorial/purging.html#) for VCL examples able to
 handle these kind of requests.
 
-This script is designed to run in a supervised environment like supervisord, daemontools or runit.
-For runit example code see runit-run and runit-log-run.
+This script is designed to run in a supervised environment like *supervisord*, *daemontools* or *runit*.
+For *runit* example code see runit-run and runit-log-run.
 
 ## Usage
 
@@ -44,5 +43,9 @@ To issue a PURGE request, then use
 curl -X PURGE -H "Host: vhost.whatever" "http://127.0.0.1:8042/foo/bar"  > /dev/null
 ```
 
-which will send PURGE requests to all endpoints using vhost.whatever as Host: header and /foo/bar as URL.
+which will send PURGE requests to all endpoints using *vhost.whatever* as *Host:* header and */foo/bar* as URL.
 
+## Dependencies
+
+* Python 2.7
+* [Twisted](http://twistedmatrix.com/trac/wiki/Downloads), Debian/Ubuntu Package: *python-twisted*
