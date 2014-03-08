@@ -3,7 +3,7 @@ varnish-cache-reaper
 
 Simple python/twisted HTTP daemon forwarding PURGE and BAN requests to multiple varnish (or other proxy) instances
 
-The daemon forwards all HTTP PURGE and BAN request using the original Host-header and URL.
+The daemon forwards all HTTP PURGE and BAN requests using the original Host-header and URL to all configured endpoints.
 See [Varnish documentation](https://www.varnish-cache.org/docs/3.0/tutorial/purging.html#) for VCL examples able to
 handle these kind of requests.
 
@@ -38,7 +38,7 @@ requests to http://127.0.0.1:8080 and http://127.0.0.1:8081.
 
 To issue a PURGE request, then use
 ```
-curl -X PURGE "http://vhost.whatever:8042/foo/bar"  > /dev/null
+curl -X PURGE -H "Host: vhost.whatever" "http://127.0.0.1:8042/foo/bar"  > /dev/null
 ```
 
 which will send PURGE requests to all endpoints using vhost.whatever as Host: header and /foo/bar as URL.
