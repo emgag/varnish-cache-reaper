@@ -7,6 +7,9 @@ The daemon forwards all HTTP PURGE and BAN requests using the original Host-head
 See [Varnish documentation](https://www.varnish-cache.org/docs/3.0/tutorial/purging.html#) for VCL examples able to
 handle these kind of requests.
 
+This script is designed to run in a supervised environment like supervisord, daemontools or runit.
+For runit example code see runit-run and runit-log-run.
+
 ## Usage
 
 ```

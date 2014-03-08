@@ -1,0 +1,2 @@
+#!/bin/sh
+exec chpst -u varnish:varnish /usr/bin/logger -t purge-dispatch

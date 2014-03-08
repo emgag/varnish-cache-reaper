@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
 #
 # Simple web service to dispatch purge requests to multiple proxies
-#
-
+# (c) 2014, Web Media Publishing AG (Matthias Blaser)
+# License: MIT
 from __future__ import print_function
 from argparse import ArgumentParser
 from sys import stderr, stdout, exit
