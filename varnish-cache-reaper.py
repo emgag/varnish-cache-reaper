@@ -26,9 +26,17 @@ def onSuccess(res):
     else:
         indicator = "!!"
 
-    print(
-        "[" + indicator + "] " + res.request.method + " response for " + res.request.absoluteURI + ": " + str(res.code),
-        end="\n", file=stdout)
+    # older versions of twisted don't include a request object
+    if hasattr(res, 'request'):
+        print(
+            "[" + indicator + "] " + res.request.method + " response for " + res.request.absoluteURI + ": " + str(
+                res.code),
+            end="\n", file=stdout)
+    else:
+        print(
+            "[" + indicator + "] Server response: " + str(
+                res.code),
+            end="\n", file=stdout)
 
 
 class DispatchResource(resource.Resource):
