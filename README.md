@@ -107,3 +107,8 @@ which will send PURGE requests to all endpoints using *vhost.whatever* as *Host:
 
 * Python 2.7
 * [Twisted](http://twistedmatrix.com/trac/wiki/Downloads), Debian/Ubuntu Package: *python-twisted*
+
+## License
+
+varnish-cache-reaper is licensed under the [MIT License](http://opensource.org/licenses/MIT).
+
