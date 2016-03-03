@@ -29,9 +29,71 @@ optional arguments:
                         TCP port to listen on, default 8042
 ```
 
-## VCL example (Varnish 3)
+## VCL example
 
-See [Varnish documentation](https://www.varnish-cache.org/docs/3.0/tutorial/purging.html) for VCL details about handling PURGE and BAN requests.
+### Varnish 4.x
+
+[Varnish documentation](https://www.varnish-cache.org/docs/4.1/users-guide/purging.html) on purging and banning in varnish 4.
+
+```VCL
+# purgers acl
+# - who is allowed to issue PURGE and BAN requests
+# 
+acl purgers {
+	"localhost";
+}
+
+sub vcl_recv {
+	[...]
+    if (req.method == "PURGE") {
+        if (!client.ip ~ purge) {
+            return(synth(405,"Method not allowed"));
+        }
+        return (purge);
+    }
+
+    if (req.method == "BAN" && client.ip ~ purgers ) {
+        # remove leading / to not confuse regular expression
+        ban(
+            "obj.http.x-host == " + req.http.host + " && " +
+            "obj.http.x-url ~ " + regsub(req.url, "^/", "")
+        );
+
+        return(synth(200, "Banned"));
+    } else {
+        return(synth(405,"Method not allowed"));
+    }
+
+	[...]
+
+	return(hash);
+}
+
+sub vcl_backend_response {
+    [...]
+
+	# be friendly to ban lurker
+	set beresp.http.x-url = bereq.url;
+	set beresp.http.x-host = bereq.http.host;
+	
+	[...]
+}
+
+sub vcl_deliver {
+    [...]
+	
+	# remove some variables we used before
+	unset resp.http.x-url;
+	unset resp.http.x-host;
+	
+    [...]
+}
+
+```
+
+### Varnish 3
+
+[Varnish documentation](https://www.varnish-cache.org/docs/3.0/tutorial/purging.html) on purging and banning in varnish 3.
 
 ```VCL
 # purgers acl
