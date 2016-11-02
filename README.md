@@ -1,10 +1,8 @@
 # varnish-cache-reaper
 
-[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/0.1.0/active.svg)](http://www.repostatus.org/#active)
-
 Simple python/twisted HTTP daemon forwarding PURGE and BAN requests to multiple varnish (or other proxy) instances.
 
-The daemon forwards all HTTP PURGE and BAN requests using the original Host-header and URL to all configured endpoints.
+The daemon forwards all HTTP PURGE and BAN requests using the original Host-header and URL to all configured endpoints. It also supports surrogate keys (cache tags) using the [xkey module](https://github.com/varnish/varnish-modules/blob/master/docs/vmod_xkey.rst), it will forward _XKey_ and _XKey-Purge_ headers if present.
 
 This script is designed to run in a supervised environment like *supervisord*, *daemontools* or *runit*.
 For *runit* example code see runit-run and runit-log-run.
@@ -31,11 +29,15 @@ optional arguments:
 
 ## VCL example
 
-### Varnish 4.x
+### Varnish 4.x / 5.x
 
-[Varnish documentation](https://www.varnish-cache.org/docs/4.1/users-guide/purging.html) on purging and banning in varnish 4.
+Varnish documentation on [purging and banning in varnish 4](https://www.varnish-cache.org/docs/4.1/users-guide/purging.html), or in [varnish 5](https://www.varnish-cache.org/docs/5.0/users-guide/purging.html) 
 
 ```VCL
+[...]
+# use xkey module
+import xkey;
+
 # purgers acl
 # - who is allowed to issue PURGE and BAN requests
 # 
@@ -49,6 +51,12 @@ sub vcl_recv {
         if (!client.ip ~ purgers) {
             return(synth(405,"Method not allowed"));
         }
+        
+        if(req.http.xkey) {
+            set req.http.n-gone = xkey.softpurge(req.http.xkey);
+            return (synth(200, "Got " + req.http.xkey + ", invalidated " + req.http.n-gone + " objects"));
+        }
+        
         return (purge);
     }
 
@@ -85,6 +93,7 @@ sub vcl_deliver {
 	# remove some variables we used before
 	unset resp.http.x-url;
 	unset resp.http.x-host;
+	unset resp.http.xkey;
 	
     [...]
 }
@@ -158,12 +167,18 @@ requests to http://127.0.0.1:8080 and http://127.0.0.1:8081.
 ./varnish-cache-reaper.py -l 127.0.0.1 http://127.0.0.1:8080 http://127.0.0.1:8081
 ```
 
-To issue a PURGE request, then use
+To issue a PURGE request, use
 ```
 curl -X PURGE -H "Host: vhost.whatever" "http://127.0.0.1:8042/foo/bar"  > /dev/null
 ```
 
 which will send PURGE requests to all endpoints using *vhost.whatever* as *Host:* header and */foo/bar* as URL.
+
+To issue a PURGE request using a surrogate key, use
+```
+curl -X PURGE -H "Host: vhost.whatever" -H "Xkey: some-cache-tag" "http://127.0.0.1:8042/foo/bar"  > /dev/null
+```
+
 
 ## Dependencies
 

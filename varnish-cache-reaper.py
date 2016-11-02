@@ -1,14 +1,14 @@
 #!/usr/bin/env python2
 #
 # Simple web service to dispatch purge requests to multiple proxies
-# (c) 2014, Web Media Publishing AG (Matthias Blaser)
+# (c) 2015, Entertainment Media Group AG (Matthias Blaser)
 # License: MIT
+
 from __future__ import print_function
 from argparse import ArgumentParser
 from sys import stderr, stdout, exit
 from twisted.web import server, resource, client, http_headers
 from twisted.internet import reactor, error
-
 
 def onFailure(err):
     """
@@ -52,8 +52,16 @@ class DispatchResource(resource.Resource):
             print(
                 "[II] Sending " + method + " request for " + request.getRequestHostname() + request.uri + " to: " + target,
                 end="\n", file=stdout)
-            d = self.agent.request(method, target + request.uri,
-                                   http_headers.Headers({"Host": [request.getRequestHostname()]}))
+
+            requestHeaders = {"Host": [request.getRequestHostname()]}
+
+            if (request.getHeader("xkey")):
+                requestHeaders["xkey"] = [request.getHeader("xkey")]
+
+            if (request.getHeader("xkey-purge")):
+                requestHeaders["xkey-purge"] = [request.getHeader("xkey-purge")]
+
+            d = self.agent.request(method, target + request.uri, http_headers.Headers(requestHeaders))
             d.addCallbacks(onSuccess, onFailure)
 
     def render_BAN(self, request):
@@ -73,6 +81,7 @@ class DispatchResource(resource.Resource):
         request.setHeader("content-type", "text/plain")
         self.dispatch("PURGE", request)
         return "PURGE requested for: " + request.getRequestHostname() + request.uri + "\n"
+
 
 # parse cli argumennts
 parser = ArgumentParser(description="Varnish cache reaper", version="0.1")
@@ -95,4 +104,3 @@ try:
 except error.CannotListenError as e:
     print("[!!] Could not start service: " + str(e.socketError), end="\n", file=stderr)
     exit(1)
-
