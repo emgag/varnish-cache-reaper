@@ -1,5 +1,9 @@
 # varnish-cache-reaper
 
+**UNMAINTAINED (2018/06/28):** While this tool is stable and has been used in production for 4 years, this is no longer maintained and is superseded by [varnish-towncrier](https://github.com/emgag/varnish-towncrier).
+
+--
+
 Simple python/twisted HTTP daemon forwarding PURGE and BAN requests to multiple varnish (or other proxy) instances.
 
 The daemon forwards all HTTP PURGE and BAN requests using the original Host-header and URL to all configured endpoints. It also supports surrogate keys (cache tags) using the [xkey module](https://github.com/varnish/varnish-modules/blob/master/docs/vmod_xkey.rst), it will forward _XKey_ and _XKey-Purge_ headers if present.
